@@ -12,22 +12,23 @@ refpos = me.observatory('OVRO_MMA')
 sm.setconfig(telescopename='DSA-110', x=x, y=y, dishdiameter=[5.0]*len(x), z=[0.]*len(x), offset=[0.0],
              mount=['ALT-AZ'], antname=names, padname=names, coordsystem='local', referencelocation=refpos)
 
-sm.setspwindow(spwname='LBand', freq='1.420GHz', deltafreq='3.2MHz', freqresolution='3.2MHz', nchannels=1, stokes='XX YY')
+sm.setspwindow(spwname='LBand', freq='1.4GHz', deltafreq='0.5MHz', freqresolution='0.5MHz', nchannels=1, stokes='XX YY')
 sm.settimes(integrationtime='1s', usehourangle=True)
-sm.setnoise(simplenoise='0.1Jy')
+#sm.setnoise(simplenoise='0.1Jy')
 sm.setfeed(mode='perfect X Y')
-sm.setgain(mode='fbm', amplitude=0.1)
+#sm.setgain(mode='fbm', amplitude=0.1)
 sm.setauto(autocorrwt=0.0)
 
-caldir = me.direction('J2000',  '16h00m0.0', '50d0m0.000')
+caldir = me.direction('J2000',  '12h00m0.0', '50d0m0.000')
 sm.setfield(sourcename='cal', sourcedirection=caldir)
-sourcedir = me.direction('J2000',  '17h00m0.0', '50d0m0.000')
-sm.setfield(sourcename='src', sourcedirection=sourcedir)
-
-sm.corrupt()
-
+#sourcedir = me.direction('J2000',  '12h30m0.0', '50d0m0.000')
+#sm.setfield(sourcename='src', sourcedirection=sourcedir)
 sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')
-sm.observe(sourcename='src', spwname='LBand', starttime='900s', stoptime='1800s')  # should separate more in time
+#sm.observe(sourcename='src', spwname='LBand', starttime='900s', stoptime='1800s')  # should separate more in time
+
+sm.predict(imagename='Gaussian.im')
+
+#sm.corrupt()
 
 sm.summary()
 sm.done()
