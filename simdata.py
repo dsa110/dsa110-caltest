@@ -5,10 +5,12 @@ y = [-1050, -500, 350, 800, 975, 1120, 1100, 1050, 950, 775, 1000, 1120, 575, -8
 names = ['DSA-101', 'DSA-102', 'DSA-103', 'DSA-104', 'DSA-105', 'DSA-106', 'DSA-107', 'DSA-108', 'DSA-109', 'DSA-110', 'DSA-111', 'DSA-112', 'DSA-113', 'DSA-114', 'DSA-115']
 
 sm = ct.simulator()
-sm.open('dsa110_cal.ms')
+sm.open('dsa110-calsrc.ms')
 
 me = ct.measures()
 refpos = me.observatory('OVRO_MMA')                                                                                                                                                
+
+# TODO: confirm coordinates and set offsets from OVRO_MMA
 sm.setconfig(telescopename='DSA-110', x=x, y=y, dishdiameter=[5.0]*len(x), z=[0.]*len(x), offset=[0.0],
              mount=['ALT-AZ'], antname=names, padname=names, coordsystem='local', referencelocation=refpos)
 
@@ -19,14 +21,16 @@ sm.setfeed(mode='perfect X Y')
 #sm.setgain(mode='fbm', amplitude=0.1)
 sm.setauto(autocorrwt=0.0)
 
-caldir = me.direction('J2000',  '12h00m0.0', '50d0m0.000')
+caldirstr = "J2000 12h00m00.0s 50d00m00.0s"
+caldir = me.direction(*caldirstr.split())
 sm.setfield(sourcename='cal', sourcedirection=caldir)
-sourcedir = me.direction('J2000',  '12h30m0.0', '50d0m0.000')
+srcdirstr = "J2000 12h30m00.0s 50d00m00.0s"
+sourcedir = me.direction(*srcdirstr.split())
 sm.setfield(sourcename='src', sourcedirection=sourcedir)
-sm.observemany(sourcename=['cal', 'src'], spwname=['LBand', 'LBand'], starttime=['-450s', '-450s'], stoptime=['450s', '450s'])
+sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')  # times are in HA referenced to first source
+sm.observe(sourcename='src', spwname='LBand', starttime='1350s', stoptime='2250s')
 
-sm.predict(complist='cal.cl')
-sm.predict(complist='src.cl')
+sm.predict(complist='srcs.cl')
 
 #sm.corrupt()
 
