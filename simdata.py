@@ -26,7 +26,7 @@ sm.setfield(sourcename='cal', sourcedirection=caldir)
 sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')
 #sm.observe(sourcename='src', spwname='LBand', starttime='900s', stoptime='1800s')  # should separate more in time
 
-sm.predict(imagename='Gaussian.im')
+sm.predict(complist='Gauss_point.cl')
 
 #sm.corrupt()
 
