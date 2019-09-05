@@ -21,6 +21,11 @@ sm.setfeed(mode='perfect X Y')
 #sm.setgain(mode='fbm', amplitude=0.1)
 sm.setauto(autocorrwt=0.0)
 
+vp = ct.vpmanager()
+vp.reset()
+vp.setpbairy(telescope="DSA-110", dishdiam="5m", maxrad="10deg", blockagediam="1m")
+sm.setvp(dovp=True, usedefaultvp=False)
+
 caldirstr = "J2000 12h00m00.0s 50d00m00.0s"
 caldir = me.direction(*caldirstr.split())
 sm.setfield(sourcename='cal', sourcedirection=caldir)
