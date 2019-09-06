@@ -1,6 +1,6 @@
 import logging
-logging.basicConfig()
-logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 import casatools as ct
 import os.path
@@ -34,6 +34,7 @@ def simulate(complist='src.cl', msname='dsa110-calsrc.ms', freq='1.4GHz', integr
     """ Use source model to generate simulated ms for a few DSA antennas.
     """
 
+    # outriggers
     x = [0, 400, 380, 370, 410, 420, 200, -200, -400, -980, -550, -1250, -1200, -1200, -1350]
     y = [-1050, -500, 350, 800, 975, 1120, 1100, 1050, 950, 775, 1000, 1120, 575, -800, -900]
     names = ['DSA-101', 'DSA-102', 'DSA-103', 'DSA-104', 'DSA-105', 'DSA-106', 'DSA-107', 'DSA-108', 'DSA-109', 'DSA-110', 'DSA-111', 'DSA-112', 'DSA-113', 'DSA-114', 'DSA-115']
@@ -88,5 +89,14 @@ def read(msname='dsa110-calsrc.ms'):
     data = dd['data']                                                                                                                                               
 #    times = dd['axis_info']['time_axis']['MJDseconds']                                                                                                              
 #    plt.plot(data[...,0].flatten().real, data[...,0].flatten().imag, '.')  
+    logger.info("Read data of shape: {0}".format(data.shape))
 
     return data
+
+
+def solve(msname='dsa110-calsrc.ms'):
+    pass
+
+
+def image(msname='dsa110-calsrc.ms'):
+    pass
