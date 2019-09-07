@@ -94,9 +94,22 @@ def read(msname='dsa110-calsrc.ms'):
     return data
 
 
-def solve(msname='dsa110-calsrc.ms'):
-    pass
+def solve(msname='dsa110-calsrc.ms', calname='cal.G', apply=False, show=True):
+    cb = ct.calibrater()
+    cb.open(msname)
+    cb.setsolve(type='G', t=900., table=calname, phaseonly=True, refant=0)
+    cb.solve()
+
+    if show:
+        cb.listcal(caltable=calname)
+
+    if apply:
+        cb.correct()
 
 
 def image(msname='dsa110-calsrc.ms'):
-    pass
+    im = ct.imager() 
+    im.open(msname)
+
+    im.defineimage(nx=128, ny=128) 
+    im.clean(image='test.im', complist='test.cl', niter=0)  # CRASH
