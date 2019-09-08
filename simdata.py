@@ -27,9 +27,12 @@ def gensources(complist='src.cl', caldirection="J2000 12h00m00.0s 50d00m00.0s", 
     cl.rename(complist)
     cl.done()
 
+# creating FIRST model image
+# Note that header from FIRST archive only has two axes. Need to force definition on import.
+# casatasks.importfits(fitsimage='first_12h+50d.fits', imagename='first_12h+50d.ms', beam=["5arcsec", "5arcsec", "0deg"], overwrite=True, defaultaxes=True, defaultaxesvalues=[180.0, 50.0, 1400000000.0, 'I'])
 
-def simulate(complist='src.cl', msname='dsa110-calsrc.ms', freq='1.4GHz', integrationtime='1s', diameter=5.0,
-             noise='0Jy', gainnoise=0.,
+def simulate(imagename='', complist='', msname='dsa110-calsrc.ms', freq='1.4GHz', integrationtime='1s',
+             diameter=5.0, noise='0Jy', gainnoise=0.,
              calobsdir = "J2000 12h00m00.0s 50d00m00.0s", srcobsdir="J2000 12h30m00.0s 50d00m00.0s"):
     """ Use source model to generate simulated ms for a few DSA antennas.
     """
@@ -62,15 +65,17 @@ def simulate(complist='src.cl', msname='dsa110-calsrc.ms', freq='1.4GHz', integr
     vp.setpbairy(telescope="DSA-110", dishdiam="5m", maxrad="10deg", blockagediam="1m")
     sm.setvp(dovp=True, usedefaultvp=False)
 
-    sm.setfield(sourcename='cal', sourcedirection=me.direction(*calobsdir.split()))
+    if calobsdir is not None:
+        sm.setfield(sourcename='cal', sourcedirection=me.direction(*calobsdir.split()))
     if srcobsdir is not None:
         sm.setfield(sourcename='src', sourcedirection=me.direction(*srcobsdir.split()))
 
-    sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')  # times are in HA referenced to first source
+    if calobsdir is not None:
+        sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')  # times are in HA referenced to first source
     if srcobsdir is not None:
         sm.observe(sourcename='src', spwname='LBand', starttime='1350s', stoptime='2250s')  # 30min later
 
-    sm.predict(complist=complist)
+    sm.predict(complist=complist, imagename=imagename)
     sm.setnoise(mode='simplenoise', simplenoise=noise)
     sm.setgain(mode='fbm', amplitude=gainnoise)
     sm.corrupt()
