@@ -34,7 +34,20 @@ def gensources(complist='src.cl', caldirection="J2000 12h00m00.0s 50d00m00.0s", 
 # Header from FIRST archive only has two axes. Need to force definition on import.
 # > casatasks.importfits(fitsimage='first_12h+50d.fits', imagename='first_12h+50d.ms', beam=["5arcsec", "5arcsec", "0deg"], overwrite=True, defaultaxes=True, defaultaxesvalues=[180.0, 50.0, 1400000000.0, 'I'])
 
-def simulate(imagename='', complist='', msname='dsa110-calsrc.ms', freq='1.4GHz', integrationtime='1s',
+
+def transit(direction, integration, num):
+    i = 0
+    while i < num:
+        epoch, ra, dec = direction.split(' ')
+        hh, mm, ss = ra.replace('h', ' ').replace('m', ' ')[:-1].split()
+        ss = float(ss) + float(integration)
+        ra = '{0}h{1}m{2}s'.format(hh, mm, ss)
+        direction = ' '.join([epoch, ra, dec])
+        yield direction
+        i += 1
+
+
+def simulate(imagename='', complist='', msname='dsa110-calsrc.ms', freq='1.4GHz', integrationtime='10s',
              diameter=5.0, noise='0Jy', gainnoise=0., nchan=1,
              calobsdir = "J2000 12h00m00.0s 50d00m00.0s", srcobsdir="J2000 12h30m00.0s 50d00m00.0s"):
     """ Use source model to generate simulated ms for a few DSA antennas.
@@ -75,7 +88,9 @@ def simulate(imagename='', complist='', msname='dsa110-calsrc.ms', freq='1.4GHz'
         sm.setfield(sourcename='src', sourcedirection=me.direction(*srcobsdir.split()))
 
     if calobsdir is not None:
-        sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')  # times are in HA referenced to first source
+#        sm.observe(sourcename='cal', spwname='LBand', starttime='-450s', stoptime='450s')  # times are in HA referenced to first source
+        sm.observemany(sourcenames=5*['src'], spwname='LBand', starttimes=5*['-5s'], stoptimes=5*['5s'], directions=list(transit(calobsdir, 5., 5)))  # times are in HA referenced to first source
+
     if srcobsdir is not None:
         sm.observe(sourcename='src', spwname='LBand', starttime='1350s', stoptime='2250s')  # 30min later
 
@@ -86,11 +101,13 @@ def simulate(imagename='', complist='', msname='dsa110-calsrc.ms', freq='1.4GHz'
     elif len(complist):
         sm.predict(complist=complist)
 
-    if noise:
+    if noise != '0Jy':
         sm.setnoise(mode='simplenoise', simplenoise=noise)
+
     if gainnoise:
         sm.setgain(mode='fbm', amplitude=gainnoise)
-    if noise or gainnoise:
+
+    if (noise != '0Jy') or gainnoise:
         sm.corrupt()
 
     sm.summary()
